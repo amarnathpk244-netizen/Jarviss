@@ -15,7 +15,10 @@ import androidx.core.app.ServiceCompat
 
 /** Wake word -> "Yes, sir?" -> listen -> offline command or AI -> speak -> back to wake word. */
 class JarvisService : Service() {
-    companion object { const val ACTION_STOP = "com.jarvis.assistant.STOP" }
+    companion object {
+        const val ACTION_STOP = "com.jarvis.assistant.STOP"
+        const val ACTION_LISTEN = "com.jarvis.assistant.LISTEN"
+    }
 
     private val main = Handler(Looper.getMainLooper())
     private lateinit var talker: Talker
@@ -37,7 +40,11 @@ class JarvisService : Service() {
     override fun onStartCommand(i: Intent?, flags: Int, startId: Int): Int {
         if (i?.action == ACTION_STOP) { stopSelf(); return START_NOT_STICKY }
         JarvisState.running = true
-        armWake()
+        if (Prefs.get(this).accessKey.isBlank()) {
+            listen()
+        } else {
+            armWake()
+        }
         return START_STICKY
     }
 
@@ -58,8 +65,8 @@ class JarvisService : Service() {
         if (wake != null) return
         val key = Prefs.get(this).accessKey
         if (key.isBlank()) {
-            JarvisState.status = "Add your Picovoice key"
-            stopSelf(); return
+            JarvisState.status = "Ready - tap to speak"
+            return
         }
         try {
             val w = PorcupineWakeWord(this, key, "Hey-Jarvis_en_android.ppn")

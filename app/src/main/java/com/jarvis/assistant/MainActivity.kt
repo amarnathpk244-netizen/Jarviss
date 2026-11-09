@@ -76,7 +76,7 @@ fun JarvisApp() {
                 Button(onClick = {
                     save()
                     if (JarvisState.running) {
-                        ctx.startService(Intent(ctx, JarvisService::class.java).setAction(JarvisService.ACTION_STOP))
+                        ctx.startService(Intent(ctx, JarvisService::class.java).setAction(JarvisService.ACTION_LISTEN))
                     } else if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                         perms.launch(arrayOf(
                             Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS,
@@ -85,7 +85,7 @@ fun JarvisApp() {
                     } else {
                         ContextCompat.startForegroundService(ctx, Intent(ctx, JarvisService::class.java))
                     }
-                }) { Text(if (JarvisState.running) "Disable microphone" else "Enable Jarvis") }
+                }) { Text(if (JarvisState.running) "Tap to Speak" else "Enable Jarvis") }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Driving mode (short answers)"); Spacer(Modifier.width(8.dp))
                     Switch(driving, { driving = it; save() })
