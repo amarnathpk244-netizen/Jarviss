@@ -86,6 +86,9 @@ fun JarvisApp() {
                         ContextCompat.startForegroundService(ctx, Intent(ctx, JarvisService::class.java))
                     }
                 }) { Text(if (JarvisState.running) "Disable microphone" else "Enable Jarvis") }
+                OutlinedButton(onClick = {
+                    ctx.startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                }) { Text("Enable phone voice control (Accessibility)") }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Driving mode (short answers)"); Spacer(Modifier.width(8.dp))
                     Switch(driving, { driving = it; save() })

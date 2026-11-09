@@ -17,6 +17,21 @@ object CommandRouter {
     fun route(ctx: Context, raw: String): String? {
         val t = raw.trim().lowercase()
         return try {
+            val screenCommand = when (t) {
+                "go back", "back", "പിന്നോട്ട്", "തിരികെ" -> "back"
+                "go home", "home", "home screen", "ഹോം" -> "home"
+                "recent apps", "recents" -> "recents"
+                "show notifications", "open notifications", "notifications" -> "notifications"
+                "quick settings", "open quick settings" -> "quick settings"
+                "scroll down", "താഴേക്ക് സ്ക്രോൾ", "താഴേക്ക്" -> "scroll down"
+                "scroll up", "മുകളിലേക്ക് സ്ക്രോൾ", "മുകളിലേക്ക്" -> "scroll up"
+                else -> null
+            }
+            if (screenCommand != null) {
+                val service = JarvisAccessibilityService.active
+                    ?: return "Enable Jarvis Accessibility in Android Settings first."
+                return if (service.command(screenCommand)) "Done." else "I couldn't control this screen."
+            }
             Parsing.openTarget(t)?.let { return openApp(ctx, it) }
             Parsing.callTarget(t)?.let { return call(ctx, it) }
             Parsing.navTarget(t)?.let { return navigate(ctx, it) }
