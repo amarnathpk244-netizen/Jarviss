@@ -25,6 +25,26 @@ class JarvisService : Service(),
 
     private val channelId = "jarvis_voice"
 
+
+    private fun createChannel() {
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            val channel = android.app.NotificationChannel(
+                channelId,
+                "Jarvis Voice Assistant",
+                android.app.NotificationManager.IMPORTANCE_LOW
+            )
+
+            channel.description =
+                "Jarvis microphone listening service"
+
+            val manager = getSystemService(
+                android.content.Context.NOTIFICATION_SERVICE
+            ) as android.app.NotificationManager
+
+            manager.createNotificationChannel(channel)
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
 
