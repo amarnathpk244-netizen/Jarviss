@@ -98,7 +98,7 @@ class JarvisService : Service(),
 
             putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE,
-                "en-IN"
+                "en-US"
             )
 
             putExtra(
@@ -108,7 +108,7 @@ class JarvisService : Service(),
 
             putExtra(
                 RecognizerIntent.EXTRA_PREFER_OFFLINE,
-                true
+                false
             )
         }
 
@@ -366,7 +366,24 @@ class JarvisService : Service(),
     override fun onEndOfSpeech() {}
 
     override fun onError(error: Int) {
-        restart()
+        android.util.Log.e(
+            "JARVIS",
+            "Speech recognition error: $error"
+        )
+
+        if (!active) return
+
+        when (error) {
+            13 -> {
+                android.util.Log.e(
+                    "JARVIS",
+                    "Speech language pack unavailable"
+                )
+                active = false
+                stopSelf()
+            }
+            else -> restart()
+        }
     }
 
     override fun onEvent(
