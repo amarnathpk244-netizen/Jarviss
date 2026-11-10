@@ -11,8 +11,8 @@ android {
         applicationId = "com.jarvis.assistant"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1"
+        versionCode = 2
+        versionName = "0.2-voice-fix"
         // Your own backend that holds the Gemini key. Never put the key itself here.
         buildConfigField("String", "PROXY_URL", "\"https://YOUR-PROXY.example.com/chat\"")
     }

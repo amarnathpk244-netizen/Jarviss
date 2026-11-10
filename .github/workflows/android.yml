@@ -2,7 +2,7 @@ name: Build Jarvis APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: ['**']
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,20 +14,19 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Configure Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: "platform-tools"
+      - uses: android-actions/setup-android@v3
       - name: Install Android SDK 36
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Check voice commands
+        run: |
+          javac -encoding UTF-8 -d /tmp/jarvis-tests app/src/main/java/com/jarvis/assistant/VoiceCommands.java tools/VoiceRegression.java
+          java -cp /tmp/jarvis-tests VoiceRegression
+      - name: Build and test debug APK
+        run: bash ./gradlew --no-daemon :app:assembleDebug :app:testDebugUnitTest --stacktrace
+      - uses: actions/upload-artifact@v4
         with:
-          gradle-version: '8.11.1'
-      - name: Build debug APK
-        run: gradle --no-daemon :app:assembleDebug :app:testDebugUnitTest --stacktrace
-      - name: Upload APK
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jarvis-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: Jarvis-Voice-Fix-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
