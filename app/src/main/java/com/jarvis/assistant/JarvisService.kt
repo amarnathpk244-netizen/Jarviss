@@ -79,7 +79,21 @@ class JarvisService : Service(),
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            tts?.language = Locale.US
+            val malayalam = Locale("ml", "IN")
+
+            val result = tts?.setLanguage(malayalam)
+
+            if (
+                result == TextToSpeech.LANG_MISSING_DATA ||
+                result == TextToSpeech.LANG_NOT_SUPPORTED
+            ) {
+                android.util.Log.w(
+                    "JARVIS",
+                    "Malayalam TTS unavailable; using English"
+                )
+                tts?.language = Locale.US
+            }
+
             speechReady = true
             listen()
         }
@@ -98,7 +112,7 @@ class JarvisService : Service(),
 
             putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE,
-                "en-US"
+                "ml-IN"
             )
 
             putExtra(
@@ -182,7 +196,7 @@ class JarvisService : Service(),
             )
         ) {
             waitingForCommand = true
-            say("Yes, what can I do for you?")
+            say("പറയൂ, എന്താണ് വേണ്ടത്?")
         }
     }
 
@@ -206,7 +220,7 @@ class JarvisService : Service(),
             if (command.isNotEmpty()) {
                 execute(command)
             } else {
-                say("Yes, what can I do for you?")
+                say("പറയൂ, എന്താണ് വേണ്ടത്?")
             }
 
             return
@@ -219,6 +233,41 @@ class JarvisService : Service(),
     }
 
     private fun execute(command: String) {
+        val appCommands = mapOf(
+            "instagram" to "com.instagram.android",
+            "ഇൻസ്റ്റാഗ്രാം" to "com.instagram.android",
+            "youtube" to "com.google.android.youtube",
+            "യൂട്യൂബ്" to "com.google.android.youtube",
+            "whatsapp" to "com.whatsapp",
+            "വാട്സ്ആപ്പ്" to "com.whatsapp",
+            "വാട്ട്സ്ആപ്പ്" to "com.whatsapp",
+            "maps" to "com.google.android.apps.maps",
+            "മാപ്സ്" to "com.google.android.apps.maps"
+        )
+
+        val normalized = command.lowercase(Locale.ROOT).trim()
+
+        val requestedApp = appCommands.entries.firstOrNull {
+            normalized.contains(it.key)
+        }
+
+        val openWords = listOf(
+            "open",
+            "launch",
+            "തുറക്ക്",
+            "തുറക്കൂ",
+            "തുറക്ക",
+            "ഓപ്പൺ",
+            "ഓപ്പണ്",
+            "തുറന്നു"
+        )
+
+        if (requestedApp != null &&
+            openWords.any { normalized.contains(it) }) {
+            openApp(requestedApp.value)
+            return
+        }
+
         when {
             command.contains("time") -> {
                 val time =
